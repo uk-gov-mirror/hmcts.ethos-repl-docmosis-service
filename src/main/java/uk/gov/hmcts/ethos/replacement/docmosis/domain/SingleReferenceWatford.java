@@ -2,12 +2,12 @@ package uk.gov.hmcts.ethos.replacement.docmosis.domain;
 
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+//import javax.persistence.Entity;
+//import javax.persistence.Table;
 
-@Entity
+//@Entity
 @NoArgsConstructor
-@Table(name = "singleReferenceWatford")
+//@Table(name = "singleReferenceWatford")
 public class SingleReferenceWatford extends SingleReference {
 
     public SingleReferenceWatford(String caseId, String previousRef, String previousYear, String currentYear) {

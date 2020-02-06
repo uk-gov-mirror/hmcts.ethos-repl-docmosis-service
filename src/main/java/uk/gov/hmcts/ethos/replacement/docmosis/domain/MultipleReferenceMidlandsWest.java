@@ -2,12 +2,12 @@ package uk.gov.hmcts.ethos.replacement.docmosis.domain;
 
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Table;
+//import javax.persistence.Entity;
+//import javax.persistence.Table;
 
-@Entity
+//@Entity
 @NoArgsConstructor
-@Table(name = "multipleReferenceMidlandsWest")
+//@Table(name = "multipleReferenceMidlandsWest")
 public class MultipleReferenceMidlandsWest extends MultipleReference {
 
     public MultipleReferenceMidlandsWest(String caseId, String previousRef) {

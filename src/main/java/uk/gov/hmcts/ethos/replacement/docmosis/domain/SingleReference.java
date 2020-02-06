@@ -2,18 +2,18 @@ package uk.gov.hmcts.ethos.replacement.docmosis.domain;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+//import javax.persistence.*;
 
 import static uk.gov.hmcts.ethos.replacement.docmosis.model.helper.Constants.DEFAULT_INIT_REF;
 import static uk.gov.hmcts.ethos.replacement.docmosis.model.helper.Constants.DEFAULT_MAX_REF;
 
-@MappedSuperclass
+//@MappedSuperclass
 @Data
 @NoArgsConstructor
 public class SingleReference {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     protected String caseId;
