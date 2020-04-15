@@ -6,14 +6,21 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.ethos.replacement.docmosis.client.CcdClient;
 import uk.gov.hmcts.ethos.replacement.docmosis.exceptions.DocumentManagementException;
 import uk.gov.hmcts.ethos.replacement.docmosis.helpers.BulkHelper;
+import uk.gov.hmcts.ethos.replacement.docmosis.helpers.Helper;
 import uk.gov.hmcts.ethos.replacement.docmosis.model.bulk.BulkData;
 import uk.gov.hmcts.ethos.replacement.docmosis.model.bulk.BulkDetails;
 import uk.gov.hmcts.ethos.replacement.docmosis.model.bulk.BulkDocumentInfo;
 import uk.gov.hmcts.ethos.replacement.docmosis.model.bulk.BulkRequest;
-import uk.gov.hmcts.ethos.replacement.docmosis.model.ccd.*;
+import uk.gov.hmcts.ethos.replacement.docmosis.model.ccd.CCDRequest;
+import uk.gov.hmcts.ethos.replacement.docmosis.model.ccd.CaseData;
+import uk.gov.hmcts.ethos.replacement.docmosis.model.ccd.CaseDetails;
+import uk.gov.hmcts.ethos.replacement.docmosis.model.ccd.DocumentInfo;
+import uk.gov.hmcts.ethos.replacement.docmosis.model.ccd.SubmitEvent;
+import uk.gov.hmcts.ethos.replacement.docmosis.model.ccd.items.RespondentSumTypeItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -37,6 +44,38 @@ public class DocumentGenerationService {
         } catch (Exception ex) {
             throw new DocumentManagementException(MESSAGE + caseDetails.getCaseId() + ex.getMessage());
         }
+    }
+
+    public List<DocumentInfo> processDocumentsRequest(CCDRequest ccdRequest, String authToken) {
+        CaseDetails caseDetails = ccdRequest.getCaseDetails();
+        CaseData caseData = caseDetails.getCaseData();
+
+        List<DocumentInfo> documentInfoList = new ArrayList<>();
+        List<RespondentSumTypeItem> activeRespondents = Helper.getActiveRespondents(caseData);
+
+        ListIterator<RespondentSumTypeItem> itr = activeRespondents.listIterator();
+
+        while (itr.hasNext()) {
+            int index = itr.nextIndex();
+            RespondentSumTypeItem respondentSumTypeItem = itr.next();
+            if (index > 0) {
+                caseData.getRespondentCollection().remove(index);
+                caseData.getRespondentCollection().add(0,respondentSumTypeItem);
+            }
+
+            try {
+                documentInfoList.add(tornadoService.documentGeneration(authToken, caseData));
+            } catch (Exception ex) {
+                throw new DocumentManagementException(MESSAGE + caseDetails.getCaseId() + ex.getMessage());
+            } finally {
+                if (index > 0) {
+                    caseData.getRespondentCollection().remove(0);
+                    caseData.getRespondentCollection().add(index,respondentSumTypeItem);
+                }
+            }
+        }
+
+        return documentInfoList;
     }
 
     public BulkDocumentInfo processBulkDocumentRequest(BulkRequest bulkRequest, String authToken) {

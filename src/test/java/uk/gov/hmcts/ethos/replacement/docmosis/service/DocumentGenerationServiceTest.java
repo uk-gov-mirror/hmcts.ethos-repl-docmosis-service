@@ -1,5 +1,6 @@
 package uk.gov.hmcts.ethos.replacement.docmosis.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,9 +17,12 @@ import uk.gov.hmcts.ethos.replacement.docmosis.model.bulk.types.SearchType;
 import uk.gov.hmcts.ethos.replacement.docmosis.model.ccd.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,8 +44,11 @@ public class DocumentGenerationServiceTest {
     @Mock
     private CcdClient ccdClient;
 
+    private CCDRequest ccdRequestScot1;
+    private CaseDetails caseDetailsScot1;
+
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         ccdRequest = new CCDRequest();
         CaseDetails caseDetails = new CaseDetails();
         CaseData caseData = new CaseData();
@@ -66,6 +73,17 @@ public class DocumentGenerationServiceTest {
         bulkDocumentInfo = new BulkDocumentInfo();
         bulkDocumentInfo.setMarkUps(documentInfo.getMarkUp());
         bulkDocumentInfo.setErrors(new ArrayList<>());
+
+        ccdRequestScot1 = new CCDRequest();
+        caseDetailsScot1 = generateCaseDetails("caseDetailsScotTest1.json");
+        ccdRequestScot1.setCaseDetails(caseDetailsScot1);
+    }
+
+    @Test
+    public void processDocumentRequest() throws IOException {
+        when(tornadoService.documentGeneration(anyString(), any())).thenReturn(documentInfo);
+        DocumentInfo documentInfo1 = documentGenerationService.processDocumentRequest(ccdRequest, "authToken");
+        assertEquals(documentInfo, documentInfo1);
     }
 
     @Test(expected = Exception.class)
@@ -75,10 +93,25 @@ public class DocumentGenerationServiceTest {
     }
 
     @Test
-    public void processDocumentRequest() throws IOException {
+    public void processDocumentsRequestWithoutRespondents() throws IOException {
         when(tornadoService.documentGeneration(anyString(), any())).thenReturn(documentInfo);
-        DocumentInfo documentInfo1 = documentGenerationService.processDocumentRequest(ccdRequest, "authToken");
-        assertEquals(documentInfo, documentInfo1);
+        List<DocumentInfo> documentInfoList = documentGenerationService.processDocumentsRequest(ccdRequest, "authToken");
+        assertEquals(0, documentInfoList.size());
+    }
+
+    @Test
+    public void processDocumentsRequestWithRespondents() throws IOException {
+        when(tornadoService.documentGeneration(anyString(), any())).thenReturn(documentInfo);
+        List<DocumentInfo> documentInfoList = documentGenerationService.processDocumentsRequest(ccdRequestScot1, "authToken");
+        assertEquals(2, documentInfoList.size());
+        assertEquals(documentInfo, documentInfoList.get(0));
+        assertEquals(documentInfo, documentInfoList.get(1));
+    }
+
+    @Test(expected = Exception.class)
+    public void processDocumentsRequestException() throws IOException {
+        when(tornadoService.documentGeneration(anyString(), any())).thenThrow(new RuntimeException());
+        documentGenerationService.processDocumentsRequest(ccdRequestScot1, "authToken");
     }
 
     @Test
@@ -141,5 +174,12 @@ public class DocumentGenerationServiceTest {
     public void processBulkScheduleRequestException() throws IOException {
         when(tornadoService.scheduleGeneration(anyString(), any())).thenThrow(new RuntimeException());
         documentGenerationService.processBulkScheduleRequest(bulkRequest, "authToken");
+    }
+
+    private CaseDetails generateCaseDetails(String jsonFileName) throws Exception {
+        String json = new String(Files.readAllBytes(Paths.get(Objects.requireNonNull(getClass().getClassLoader()
+                .getResource(jsonFileName)).toURI())));
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(json, CaseDetails.class);
     }
 }

@@ -26,7 +26,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
@@ -63,6 +65,7 @@ public class DocumentGenerationControllerTest {
     private MockMvc mvc;
     private JsonNode requestContent;
     private DocumentInfo documentInfo;
+    private List<DocumentInfo> documentInfoList;
 
     private void doRequestSetUp() throws IOException, URISyntaxException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -75,11 +78,12 @@ public class DocumentGenerationControllerTest {
         mvc = MockMvcBuilders.webAppContextSetup(applicationContext).build();
         doRequestSetUp();
         documentInfo = DocumentInfo.builder().description(DOC_NAME).build();
+        documentInfoList = Arrays.asList(documentInfo);
     }
 
     @Test
     public void generateDocumentOk() throws Exception {
-        when(documentGenerationService.processDocumentRequest(isA(CCDRequest.class), eq(AUTH_TOKEN))).thenReturn(documentInfo);
+        when(documentGenerationService.processDocumentsRequest(isA(CCDRequest.class), eq(AUTH_TOKEN))).thenReturn(documentInfoList);
         when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(true);
         mvc.perform(post(GEN_DOC_URL)
                 .content(requestContent.toString())
@@ -106,19 +110,6 @@ public class DocumentGenerationControllerTest {
     }
 
     @Test
-    public void generateDocumentConfirmation() throws Exception {
-        when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(true);
-        mvc.perform(post(GEN_DOC_CONFIRMATION_URL)
-                .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", notNullValue()))
-                .andExpect(jsonPath("$.errors", nullValue()))
-                .andExpect(jsonPath("$.warnings", nullValue()));
-    }
-
-    @Test
     public void generateDocumentError400() throws Exception {
         mvc.perform(post(GEN_DOC_URL)
                 .content("error")
@@ -129,7 +120,7 @@ public class DocumentGenerationControllerTest {
 
     @Test
     public void generateDocumentError500() throws Exception {
-        when(documentGenerationService.processDocumentRequest(isA(CCDRequest.class), eq(AUTH_TOKEN))).thenThrow(feignError());
+        when(documentGenerationService.processDocumentsRequest(isA(CCDRequest.class), eq(AUTH_TOKEN))).thenThrow(feignError());
         when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(true);
         mvc.perform(post(GEN_DOC_URL)
                 .content(requestContent.toString())
@@ -140,13 +131,26 @@ public class DocumentGenerationControllerTest {
 
     @Test
     public void generateDocumentOkForbidden() throws Exception {
-        when(documentGenerationService.processDocumentRequest(isA(CCDRequest.class), eq(AUTH_TOKEN))).thenReturn(documentInfo);
+        when(documentGenerationService.processDocumentsRequest(isA(CCDRequest.class), eq(AUTH_TOKEN))).thenReturn(documentInfoList);
         when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(false);
         mvc.perform(post(GEN_DOC_URL)
                 .content(requestContent.toString())
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void generateDocumentConfirmation() throws Exception {
+        when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(true);
+        mvc.perform(post(GEN_DOC_CONFIRMATION_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", notNullValue()))
+                .andExpect(jsonPath("$.errors", nullValue()))
+                .andExpect(jsonPath("$.warnings", nullValue()));
     }
 
     @Test

@@ -19,6 +19,7 @@ import uk.gov.hmcts.ethos.replacement.docmosis.service.EventValidationService;
 import uk.gov.hmcts.ethos.replacement.docmosis.service.VerifyTokenService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -29,7 +30,7 @@ public class DocumentGenerationController {
 
     private static final String LOG_MESSAGE = "received notification request for case reference :    ";
 
-    private static final String GENERATED_DOCUMENT_URL = "Please download the document from : ";
+    private static final String GENERATED_DOCUMENT_URL = "Please download the document(s) from : ";
 
     private final DocumentGenerationService documentGenerationService;
 
@@ -66,13 +67,15 @@ public class DocumentGenerationController {
         List<String> errors = eventValidationService.validateHearingNumber(ccdRequest.getCaseDetails().getCaseData());
 
         if (errors.isEmpty()) {
-            DocumentInfo documentInfo = documentGenerationService.processDocumentRequest(ccdRequest, userToken);
-            ccdRequest.getCaseDetails().getCaseData().setDocMarkUp(documentInfo.getMarkUp());
+
+            List<DocumentInfo> documentInfoList = documentGenerationService.processDocumentsRequest(ccdRequest, userToken);
+            String markUps = documentInfoList.stream().map(DocumentInfo::getMarkUp).collect(Collectors.joining(", "));
+            ccdRequest.getCaseDetails().getCaseData().setDocMarkUp(markUps);
 
             return ResponseEntity.ok(CCDCallbackResponse.builder()
                     .data(ccdRequest.getCaseDetails().getCaseData())
                     .errors(errors)
-                    .significant_item(Helper.generateSignificantItem(documentInfo))
+                    .significant_item(Helper.generateSignificantItem(documentInfoList.get(0)))
                     .build());
         }
         else {
