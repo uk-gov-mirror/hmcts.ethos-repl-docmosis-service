@@ -1,5 +1,5 @@
 provider "azurerm" {
-  features {}
+  version = "1.27.0"
 }
 
 locals {
