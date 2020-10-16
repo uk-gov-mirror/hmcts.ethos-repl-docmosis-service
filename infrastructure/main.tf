@@ -2,11 +2,6 @@ provider "azurerm" {
   features {}
 }
 
-provider "azurerm" {
-  alias = "azurerm-1"
-  version = "1.27.0"
-}
-
 locals {
   db_connection_options = "?sslmode=require"
   app = "repl-docmosis-backend"
@@ -129,7 +124,6 @@ resource "azurerm_key_vault_secret" "ethos_repl_service_s2s_secret" {
   name         = "ethos-repl-service-s2s-secret"
   value        = data.azurerm_key_vault_secret.microservicekey_ethos_repl_service.value
   key_vault_id = data.azurerm_key_vault.ethos_key_vault.id
-  provider = "azurerm.azurerm-1"
 }
 
 data "azurerm_key_vault_secret" "tornado_access_key" {
