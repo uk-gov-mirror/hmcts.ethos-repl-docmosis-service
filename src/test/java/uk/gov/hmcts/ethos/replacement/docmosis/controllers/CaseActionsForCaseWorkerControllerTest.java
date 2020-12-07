@@ -31,6 +31,7 @@ import java.util.List;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -53,7 +54,7 @@ public class CaseActionsForCaseWorkerControllerTest {
     private static final String PRE_ACCEPT_CASE_URL = "/preAcceptCase";
     private static final String AMEND_CASE_DETAILS_URL = "/amendCaseDetails";
     private static final String AMEND_RESPONDENT_DETAILS_URL = "/amendRespondentDetails";
-    private static final String ADD_AMEND_ET3_URL = "/addAmendET3";
+    private static final String AMEND_RESPONDENT_REPRESENTATIVE_URL = "/amendRespondentRepresentative";
     private static final String UPDATE_HEARING_URL = "/updateHearing";
     private static final String RESTRICTED_CASES_URL = "/restrictedCases";
     private static final String ADD_HEARING_URL = "/addHearing";
@@ -66,6 +67,7 @@ public class CaseActionsForCaseWorkerControllerTest {
     private static final String MID_RESPONDENT_ECC_URL = "/midRespondentECC";
     private static final String CREATE_ECC_URL = "/createECC";
     private static final String LINK_ORIGINAL_CASE_ECC_URL = "/linkOriginalCaseECC";
+    private static final String SINGLE_CASE_MULTIPLE_MID_EVENT_VALIDATION_URL = "/singleCaseMultipleMidEventValidation";
 
     @Autowired
     private WebApplicationContext applicationContext;
@@ -92,7 +94,13 @@ public class CaseActionsForCaseWorkerControllerTest {
     private VerifyTokenService verifyTokenService;
 
     @MockBean
-    private  EventValidationService eventValidationService;
+    private EventValidationService eventValidationService;
+
+    @MockBean
+    private SingleCaseMultipleMidEventValidationService singleCaseMultipleMidEventValidationService;
+
+    @MockBean
+    private AddSingleCaseToMultipleService addSingleCaseToMultipleService;
 
     private MockMvc mvc;
     private JsonNode requestContent;
@@ -209,7 +217,6 @@ public class CaseActionsForCaseWorkerControllerTest {
     @Test
     public void postDefaultValuesFromET1WithPositionTypeDefined() throws Exception {
         when(defaultValuesReaderService.getDefaultValues(isA(String.class), isA(String.class), isA(String.class))).thenReturn(defaultValues);
-        when(defaultValuesReaderService.getCaseData(isA(CaseData.class), isA(DefaultValues.class))).thenReturn(submitEvent.getCaseData());
         when(singleReferenceService.createReference(isA(String.class), isA(Integer.class))).thenReturn("5100001/2019");
         when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(true);
         mvc.perform(post(POST_DEFAULT_VALUES_URL)
@@ -225,7 +232,6 @@ public class CaseActionsForCaseWorkerControllerTest {
     @Test
     public void postDefaultValues() throws Exception {
         when(defaultValuesReaderService.getDefaultValues(isA(String.class), isA(String.class), isA(String.class))).thenReturn(defaultValues);
-        when(defaultValuesReaderService.getCaseData(isA(CaseData.class), isA(DefaultValues.class))).thenReturn(submitEvent.getCaseData());
         when(singleReferenceService.createReference(isA(String.class), isA(Integer.class))).thenReturn("5100001/2019");
         when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(true);
         mvc.perform(post(POST_DEFAULT_VALUES_URL)
@@ -235,20 +241,6 @@ public class CaseActionsForCaseWorkerControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data", notNullValue()))
                 .andExpect(jsonPath("$.errors", hasSize(0)))
-                .andExpect(jsonPath("$.warnings", nullValue()));
-    }
-
-    @Test
-    public void postDefaultValuesWithErrors() throws Exception {
-        when(defaultValuesReaderService.getDefaultValues(isA(String.class), isA(String.class), isA(String.class))).thenReturn(defaultValues);
-        when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(true);
-        mvc.perform(post(POST_DEFAULT_VALUES_URL)
-                .content(requestContent3.toString())
-                .header("Authorization", AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data", notNullValue()))
-                .andExpect(jsonPath("$.errors", hasSize(1)))
                 .andExpect(jsonPath("$.warnings", nullValue()));
     }
 
@@ -269,7 +261,6 @@ public class CaseActionsForCaseWorkerControllerTest {
     @Test
     public void amendCaseDetails() throws Exception {
         when(defaultValuesReaderService.getDefaultValues(isA(String.class), isA(String.class), isA(String.class))).thenReturn(defaultValues);
-        when(defaultValuesReaderService.getCaseData(isA(CaseData.class), isA(DefaultValues.class))).thenReturn(submitEvent.getCaseData());
         when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(true);
         mvc.perform(post(AMEND_CASE_DETAILS_URL)
                 .content(requestContent2.toString())
@@ -296,10 +287,9 @@ public class CaseActionsForCaseWorkerControllerTest {
     }
 
     @Test
-    public void addAmendET3() throws Exception {
-        when(caseManagementForCaseWorkerService.struckOutRespondents(isA(CCDRequest.class))).thenReturn(submitEvent.getCaseData());
+    public void amendRespondentRepresentative() throws Exception {
         when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(true);
-        mvc.perform(post(ADD_AMEND_ET3_URL)
+        mvc.perform(post(AMEND_RESPONDENT_REPRESENTATIVE_URL)
                 .content(requestContent.toString())
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -489,6 +479,19 @@ public class CaseActionsForCaseWorkerControllerTest {
     }
 
     @Test
+    public void singleCaseMultipleMidEventValidation() throws Exception {
+        when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(true);
+        mvc.perform(post(SINGLE_CASE_MULTIPLE_MID_EVENT_VALIDATION_URL)
+                .content(requestContent2.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data", notNullValue()))
+                .andExpect(jsonPath("$.errors", hasSize(0)))
+                .andExpect(jsonPath("$.warnings", nullValue()));
+    }
+
+    @Test
     public void createCaseError400() throws Exception {
         mvc.perform(post(CREATION_CASE_URL)
                 .content("error")
@@ -570,8 +573,8 @@ public class CaseActionsForCaseWorkerControllerTest {
     }
 
     @Test
-    public void addAmendET3Error400() throws Exception {
-        mvc.perform(post(ADD_AMEND_ET3_URL)
+    public void amendRespondentRepresentativeError400() throws Exception {
+        mvc.perform(post(AMEND_RESPONDENT_REPRESENTATIVE_URL)
                 .content("error")
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -671,6 +674,15 @@ public class CaseActionsForCaseWorkerControllerTest {
     @Test
     public void linkOriginalCaseECCError400() throws Exception {
         mvc.perform(post(LINK_ORIGINAL_CASE_ECC_URL)
+                .content("error")
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void singleCaseMultipleMidEventValidationError400() throws Exception {
+        mvc.perform(post(SINGLE_CASE_MULTIPLE_MID_EVENT_VALIDATION_URL)
                 .content("error")
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -778,17 +790,6 @@ public class CaseActionsForCaseWorkerControllerTest {
     }
 
     @Test
-    public void addAmendET3Error500() throws Exception {
-        when(caseManagementForCaseWorkerService.struckOutRespondents(isA(CCDRequest.class))).thenThrow(feignError());
-        when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(true);
-        mvc.perform(post(ADD_AMEND_ET3_URL)
-                .content(requestContent.toString())
-                .header("Authorization", AUTH_TOKEN)
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isInternalServerError());
-    }
-
-    @Test
     public void addHearingError500() throws Exception {
         when(caseManagementForCaseWorkerService.addNewHearingItem(isA(CCDRequest.class))).thenThrow(feignError());
         when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(true);
@@ -826,6 +827,18 @@ public class CaseActionsForCaseWorkerControllerTest {
         when(caseCreationForCaseWorkerService.generateCaseRefNumbers(isA(CCDRequest.class))).thenThrow(feignError());
         when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(true);
         mvc.perform(post(GENERATE_CASE_REF_NUMBERS_URL)
+                .content(requestContent.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void singleCaseMultipleMidEventValidationError500() throws Exception {
+        doThrow(feignError()).when(singleCaseMultipleMidEventValidationService).singleCaseMultipleValidationLogic(
+                eq(AUTH_TOKEN), isA(CaseDetails.class), isA(List.class));
+        when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(true);
+        mvc.perform(post(SINGLE_CASE_MULTIPLE_MID_EVENT_VALIDATION_URL)
                 .content(requestContent.toString())
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -923,9 +936,9 @@ public class CaseActionsForCaseWorkerControllerTest {
     }
 
     @Test
-    public void addAmendET3Forbidden() throws Exception {
+    public void amendRespondentRepresentativeForbidden() throws Exception {
         when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(false);
-        mvc.perform(post(ADD_AMEND_ET3_URL)
+        mvc.perform(post(AMEND_RESPONDENT_REPRESENTATIVE_URL)
                 .content(requestContent.toString())
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -1056,6 +1069,16 @@ public class CaseActionsForCaseWorkerControllerTest {
     public void linkOriginalCaseECCForbidden() throws Exception {
         when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(false);
         mvc.perform(post(LINK_ORIGINAL_CASE_ECC_URL)
+                .content(requestContent2.toString())
+                .header("Authorization", AUTH_TOKEN)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void singleCaseMultipleMidEventValidationForbidden() throws Exception {
+        when(verifyTokenService.verifyTokenSignature(eq(AUTH_TOKEN))).thenReturn(false);
+        mvc.perform(post(SINGLE_CASE_MULTIPLE_MID_EVENT_VALIDATION_URL)
                 .content(requestContent2.toString())
                 .header("Authorization", AUTH_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON))

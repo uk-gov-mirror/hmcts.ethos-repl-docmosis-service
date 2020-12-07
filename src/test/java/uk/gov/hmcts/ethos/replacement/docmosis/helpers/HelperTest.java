@@ -11,6 +11,7 @@ import uk.gov.hmcts.ecm.common.model.ccd.items.RespondentSumTypeItem;
 import uk.gov.hmcts.ecm.common.model.ccd.types.CorrespondenceScotType;
 import uk.gov.hmcts.ecm.common.model.ccd.types.CorrespondenceType;
 
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -19,8 +20,12 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
+import static uk.gov.hmcts.ecm.common.model.helper.Constants.MANCHESTER_CASE_TYPE_ID;
+import static uk.gov.hmcts.ecm.common.model.helper.Constants.SCOTLAND_CASE_TYPE_ID;
 
 public class HelperTest {
+
+    private static final String DUMMY_CASE_TYPE_ID = "dummy case type id";
 
     private CaseDetails caseDetails1;
     private CaseDetails caseDetails2;
@@ -41,6 +46,8 @@ public class HelperTest {
     private CaseDetails caseDetailsScot2;
     private CaseDetails caseDetailsScot3;
     private UserDetails userDetails;
+
+    private InputStream venueAddressInputStream;
 
     @Before
     public void setUp() throws Exception {
@@ -66,6 +73,7 @@ public class HelperTest {
         caseDetailsEmpty.setCaseData(new CaseData());
         userDetails = getUserDetails();
 
+        venueAddressInputStream = getClass().getClassLoader().getResourceAsStream("venueAddressValues.xlsx");
     }
 
     private CaseDetails generateCaseDetails(String jsonFileName) throws Exception {
@@ -117,7 +125,7 @@ public class HelperTest {
                 "\"resp_address\":\"1. 11 Small Street, 22 House, Manchester, North West, M12 42R, UK\\n2. 12 Small Street, 24 House, Manchester, North West, M12 4ED, UK\\n3. 11 Small Street, 22 House, Manchester, North West, M12 42R, UK\",\n" +
                 "\"Hearing_date\":\"25 November 2019, 14 December 2019, 28 December 2019\",\n" +
                 "\"Hearing_date_time\":\"25 November 2019, 14 December 2019, 28 December 2019 at 10:30\",\n" +
-                "\"Hearing_venue\":\"Manchester\",\n" +
+                "\"Hearing_venue\":\"Manchester Employment Tribunals, Alexandra House, 14-22 The Parsonage, Manchester, M3 2JA\",\n" +
                 "\"Hearing_duration\":\"2 days\",\n" +
                 "\"t1_2\":\"true\",\n" +
                 "\"Court_addressLine1\":\"Manchester Employment Tribunal,\",\n" +
@@ -142,7 +150,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetails1.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetails1.getCaseData(), "", userDetails, MANCHESTER_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -175,19 +183,19 @@ public class HelperTest {
                 "\"respondent_or_rep_county\":\"Lancashire\",\n" +
                 "\"respondent_or_rep_postCode\":\"M3 KJR\",\n" +
                 "\"respondent_reference\":\"1111111\",\n" +
-                "\"respondent_full_name\":\"\",\n" +
-                "\"respondent_addressLine1\":\"\",\n" +
-                "\"respondent_addressLine2\":\"\",\n" +
+                "\"respondent_full_name\":\"Antonio Vazquez\",\n" +
+                "\"respondent_addressLine1\":\"11 Small Street\",\n" +
+                "\"respondent_addressLine2\":\"22 House\",\n" +
                 "\"respondent_addressLine3\":\"\",\n" +
-                "\"respondent_town\":\"\",\n" +
-                "\"respondent_county\":\"\",\n" +
-                "\"respondent_postCode\":\"\",\n" +
-                "\"Respondent\":\"\",\n" +
+                "\"respondent_town\":\"Manchester\",\n" +
+                "\"respondent_county\":\"North West\",\n" +
+                "\"respondent_postCode\":\"M12 42R\",\n" +
+                "\"Respondent\":\"Antonio Vazquez\",\n" +
                 "\"resp_others\":\"\",\n" +
                 "\"resp_address\":\"\",\n" +
                 "\"Hearing_date\":\"25 November 2019\",\n" +
                 "\"Hearing_date_time\":\"25 November 2019 at 12:11\",\n" +
-                "\"Hearing_venue\":\"Manchester\",\n" +
+                "\"Hearing_venue\":\"Manchester Employment Tribunals, Alexandra House, 14-22 The Parsonage, Manchester, M3 2JA\",\n" +
                 "\"Hearing_duration\":\"2 days\",\n" +
                 "\"t2_2A\":\"true\",\n" +
                 "\"Court_addressLine1\":\"Manchester Employment Tribunal,\",\n" +
@@ -212,7 +220,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetails2.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetails2.getCaseData(), "", userDetails, MANCHESTER_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -237,13 +245,14 @@ public class HelperTest {
                 "\"claimant_town\":\"Manchester\",\n" +
                 "\"claimant_county\":\"Lancashire\",\n" +
                 "\"claimant_postCode\":\"M3 6gw\",\n" +
-                "\"respondent_or_rep_full_name\":\"Antonio Vazquez\",\n" +
-                "\"respondent_or_rep_addressLine1\":\"11 Small Street\",\n" +
-                "\"respondent_or_rep_addressLine2\":\"22 House\",\n" +
+                "\"respondent_or_rep_full_name\":\"RepresentativeNameRespondent\",\n" +
+                "\"respondent_or_rep_addressLine1\":\"56 Block C\",\n" +
+                "\"respondent_or_rep_addressLine2\":\"Ellesmere Street\",\n" +
                 "\"respondent_or_rep_addressLine3\":\"\",\n" +
                 "\"respondent_or_rep_town\":\"Manchester\",\n" +
-                "\"respondent_or_rep_county\":\"North West\",\n" +
-                "\"respondent_or_rep_postCode\":\"M12 42R\",\n" +
+                "\"respondent_or_rep_county\":\"Lancashire\",\n" +
+                "\"respondent_or_rep_postCode\":\"M3 KJR\",\n" +
+                "\"respondent_reference\":\"1111111\",\n" +
                 "\"respondent_full_name\":\"Antonio Vazquez\",\n" +
                 "\"respondent_addressLine1\":\"11 Small Street\",\n" +
                 "\"respondent_addressLine2\":\"22 House\",\n" +
@@ -281,7 +290,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetails3.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetails3.getCaseData(), "", userDetails, MANCHESTER_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -351,7 +360,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetails4.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetails4.getCaseData(), "", userDetails, MANCHESTER_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -422,7 +431,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetails5.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetails5.getCaseData(), "", userDetails, MANCHESTER_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -493,7 +502,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetails6.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetails6.getCaseData(), "", userDetails, MANCHESTER_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -539,7 +548,7 @@ public class HelperTest {
                 "\"resp_address\":\"11 Small Street, 22 House, Manchester, North West, M12 42R, UK\",\n" +
                 "\"Hearing_date\":\"\",\n" +
                 "\"Hearing_date_time\":\"\",\n" +
-                "\"Hearing_venue\":\"Manchester\",\n" +
+                "\"Hearing_venue\":\"Manchester Employment Tribunals, Alexandra House, 14-22 The Parsonage, Manchester, M3 2JA\",\n" +
                 "\"Hearing_duration\":\"2 days\",\n" +
                 "\"t7_2\":\"true\",\n" +
                 "\"Court_addressLine1\":\"Manchester Employment Tribunal,\",\n" +
@@ -564,7 +573,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetails7.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetails7.getCaseData(), "", userDetails, MANCHESTER_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -609,7 +618,7 @@ public class HelperTest {
                 "\"resp_address\":\"1. 11 Small Street, 22 House, Manchester, North West, M12 42R, UK\\n2. 1333 Small Street, 22222 House, Liverpool, North West, L12 42R, UK\",\n" +
                 "\"Hearing_date\":\"25 November 2019\",\n" +
                 "\"Hearing_date_time\":\"25 November 2019 at 12:11\",\n" +
-                "\"Hearing_venue\":\"Manchester\",\n" +
+                "\"Hearing_venue\":\"Manchester Employment Tribunals, Alexandra House, 14-22 The Parsonage, Manchester, M3 2JA\",\n" +
                 "\"Hearing_duration\":\"2 days\",\n" +
                 "\"t10_2\":\"true\",\n" +
                 "\"Court_addressLine1\":\"Manchester Employment Tribunal,\",\n" +
@@ -634,7 +643,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetails8.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetails8.getCaseData(), "", userDetails, MANCHESTER_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -679,7 +688,7 @@ public class HelperTest {
                 "\"resp_address\":\"11 Small Street, 22 House, Manchester, North West, M12 42R, UK\",\n" +
                 "\"Hearing_date\":\"25 November 2019\",\n" +
                 "\"Hearing_date_time\":\"25 November 2019 at 12:11\",\n" +
-                "\"Hearing_venue\":\"Manchester\",\n" +
+                "\"Hearing_venue\":\"Manchester Employment Tribunals, Alexandra House, 14-22 The Parsonage, Manchester, M3 2JA\",\n" +
                 "\"Hearing_duration\":\"2 days\",\n" +
                 "\"t9_2\":\"true\",\n" +
                 "\"Court_addressLine1\":\"Manchester Employment Tribunal,\",\n" +
@@ -704,7 +713,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetails9.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetails9.getCaseData(), "", userDetails, MANCHESTER_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -728,7 +737,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetails10.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetails10.getCaseData(), "", userDetails, MANCHESTER_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -776,7 +785,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetails12.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetails12.getCaseData(), "", userDetails, MANCHESTER_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -816,7 +825,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetails13.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetails13.getCaseData(), "", userDetails, MANCHESTER_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -974,7 +983,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetails14.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetails14.getCaseData(), "", userDetails, MANCHESTER_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -1202,7 +1211,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetails15.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetails15.getCaseData(), "", userDetails, MANCHESTER_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -1264,7 +1273,7 @@ public class HelperTest {
                 "\"Case_No\":\"\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetailsEmpty.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetailsEmpty.getCaseData(), "", userDetails, "", venueAddressInputStream).toString());
     }
 
     @Test
@@ -1309,7 +1318,7 @@ public class HelperTest {
                 "\"resp_address\":\"1. 11 Small Street, 22 House, Manchester, North West, M12 42R, UK\\n2. 13 Small Street, 26 House, Scotland, North West, SC13 4ED, UK\",\n" +
                 "\"Hearing_date\":\"25 November 2019\",\n" +
                 "\"Hearing_date_time\":\"25 November 2019 at 12:11\",\n" +
-                "\"Hearing_venue\":\"Manchester\",\n" +
+                "\"Hearing_venue\":\"Glasgow Tribunal Centre, Atlantic Quay, 20 York Street, Glasgow, G2 8GT\",\n" +
                 "\"Hearing_duration\":\"2 days\",\n" +
                 "\"t_Scot_7_1\":\"true\",\n" +
                 "\"Court_addressLine1\":\"Eagle Building,\",\n" +
@@ -1334,7 +1343,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetailsScot1.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetailsScot1.getCaseData(), "", userDetails, SCOTLAND_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -1379,7 +1388,7 @@ public class HelperTest {
                 "\"resp_address\":\"\",\n" +
                 "\"Hearing_date\":\"25 November 2019\",\n" +
                 "\"Hearing_date_time\":\"25 November 2019 at 12:11\",\n" +
-                "\"Hearing_venue\":\"Manchester\",\n" +
+                "\"Hearing_venue\":\"Glasgow\",\n" +
                 "\"Hearing_duration\":\"2 days\",\n" +
                 "\"t_Scot_24\":\"true\",\n" +
                 "\"Court_addressLine1\":\"Eagle Building,\",\n" +
@@ -1404,7 +1413,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetailsScot2.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetailsScot2.getCaseData(), "", userDetails, DUMMY_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -1473,7 +1482,7 @@ public class HelperTest {
                 "\"Case_No\":\"123456\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(expected, Helper.buildDocumentContent(caseDetailsScot3.getCaseData(), "", userDetails).toString());
+        assertEquals(expected, Helper.buildDocumentContent(caseDetailsScot3.getCaseData(), "", userDetails, SCOTLAND_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -1487,7 +1496,7 @@ public class HelperTest {
         correspondenceScotType.setPart3ScotDocuments(part);
         caseData.setCorrespondenceScotType(correspondenceScotType);
         caseDetailsTemplates.setCaseData(caseData);
-        assertEquals(getJson(topLevel, part), Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails).toString());
+        assertEquals(getJson(topLevel, part), Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails, SCOTLAND_CASE_TYPE_ID, venueAddressInputStream).toString());
         topLevel = "Part_4_Scot";
         part = "42";
         correspondenceScotType = new CorrespondenceScotType();
@@ -1495,7 +1504,7 @@ public class HelperTest {
         correspondenceScotType.setPart4ScotDocuments(part);
         caseData.setCorrespondenceScotType(correspondenceScotType);
         caseDetailsTemplates.setCaseData(caseData);
-        assertEquals(getJson(topLevel, part), Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails).toString());
+        assertEquals(getJson(topLevel, part), Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails, SCOTLAND_CASE_TYPE_ID, venueAddressInputStream).toString());
         topLevel = "Part_5_Scot";
         part = "52";
         correspondenceScotType = new CorrespondenceScotType();
@@ -1503,7 +1512,7 @@ public class HelperTest {
         correspondenceScotType.setPart5ScotDocuments(part);
         caseData.setCorrespondenceScotType(correspondenceScotType);
         caseDetailsTemplates.setCaseData(caseData);
-        assertEquals(getJson(topLevel, part), Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails).toString());
+        assertEquals(getJson(topLevel, part), Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails, SCOTLAND_CASE_TYPE_ID, venueAddressInputStream).toString());
         topLevel = "Part_6_Scot";
         part = "62";
         correspondenceScotType = new CorrespondenceScotType();
@@ -1511,7 +1520,7 @@ public class HelperTest {
         correspondenceScotType.setPart6ScotDocuments(part);
         caseData.setCorrespondenceScotType(correspondenceScotType);
         caseDetailsTemplates.setCaseData(caseData);
-        assertEquals(getJson(topLevel, part), Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails).toString());
+        assertEquals(getJson(topLevel, part), Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails, SCOTLAND_CASE_TYPE_ID, venueAddressInputStream).toString());
         topLevel = "Part_7_Scot";
         part = "72";
         correspondenceScotType = new CorrespondenceScotType();
@@ -1519,7 +1528,7 @@ public class HelperTest {
         correspondenceScotType.setPart7ScotDocuments(part);
         caseData.setCorrespondenceScotType(correspondenceScotType);
         caseDetailsTemplates.setCaseData(caseData);
-        assertEquals(getJson(topLevel, part), Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails).toString());
+        assertEquals(getJson(topLevel, part), Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails, SCOTLAND_CASE_TYPE_ID, venueAddressInputStream).toString());
         topLevel = "Part_15_Scot";
         part = "152";
         correspondenceScotType = new CorrespondenceScotType();
@@ -1527,7 +1536,7 @@ public class HelperTest {
         correspondenceScotType.setPart15ScotDocuments(part);
         caseData.setCorrespondenceScotType(correspondenceScotType);
         caseDetailsTemplates.setCaseData(caseData);
-        assertEquals(getJson(topLevel, part), Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails).toString());
+        assertEquals(getJson(topLevel, part), Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails, SCOTLAND_CASE_TYPE_ID, venueAddressInputStream).toString());
         topLevel = "Part_9_Scot";
         part = "162";
         correspondenceScotType = new CorrespondenceScotType();
@@ -1535,7 +1544,7 @@ public class HelperTest {
         correspondenceScotType.setPart9ScotDocuments(part);
         caseData.setCorrespondenceScotType(correspondenceScotType);
         caseDetailsTemplates.setCaseData(caseData);
-        assertEquals(getJson(topLevel, part), Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails).toString());
+        assertEquals(getJson(topLevel, part), Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails, SCOTLAND_CASE_TYPE_ID, venueAddressInputStream).toString());
     }
 
     @Test
@@ -1607,7 +1616,7 @@ public class HelperTest {
                 "\"Case_No\":\"\",\n" +
                 "}\n" +
                 "}\n";
-        assertEquals(result, Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails).toString());
+        assertEquals(result, Helper.buildDocumentContent(caseDetailsTemplates.getCaseData(), "", userDetails, "", venueAddressInputStream).toString());
     }
 
     private String getJson(String topLevel, String part) {

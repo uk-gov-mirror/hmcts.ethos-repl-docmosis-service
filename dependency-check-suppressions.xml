@@ -407,5 +407,24 @@
         <notes><![CDATA[ CVE-2007-1652  ]]></notes>
         <cve>CVE-2007-1652</cve>
     </suppress>
-
+    <suppress>
+        <notes><![CDATA[ CVE-2020-13943  ]]></notes>
+        <cve>CVE-2020-13943</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[ CVE-2020-7020  ]]></notes>
+        <cve>CVE-2020-7020</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[ CVE-2020-15250  ]]></notes>
+        <cve>CVE-2020-15250</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[ CVE-2020-25638  ]]></notes>
+        <cve>CVE-2020-25638</cve>
+    </suppress>
+    <suppress>
+        <notes><![CDATA[ CVE-2020-13956  ]]></notes>
+        <cve>CVE-2020-13956</cve>
+    </suppress>
 </suppressions>

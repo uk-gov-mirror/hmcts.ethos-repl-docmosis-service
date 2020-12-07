@@ -36,6 +36,7 @@ public class TornadoServiceTest {
     private BulkData bulkData;
     private ListingData listingData;
     private UserDetails userDetails;
+    private String userToken;
 
     @Before
     public void setUp() {
@@ -61,29 +62,30 @@ public class TornadoServiceTest {
         IdamApi idamApi = authorisation -> userDetails;
         userService = new UserService(idamApi);
         tornadoService = new TornadoService(tornadoConfiguration, documentManagementService, userService);
+        userToken = "authToken";
     }
 
     @Test(expected = Exception.class)
     public void documentGenerationError() throws IOException {
         when(userService.getUserDetails(anyString())).thenThrow(new RuntimeException());
-        tornadoService.documentGeneration("TOKEN", caseData);
+        tornadoService.documentGeneration(userToken, caseData, MANCHESTER_CASE_TYPE_ID);
     }
 
     @Test
     public void documentGeneration() throws IOException {
-        DocumentInfo documentInfo1 = tornadoService.documentGeneration("TOKEN", caseData);
+        DocumentInfo documentInfo1 = tornadoService.documentGeneration(userToken, caseData, MANCHESTER_CASE_TYPE_ID);
         assertEquals(documentInfo.toString(), documentInfo1.toString());
     }
 
     @Test
     public void listingGeneration() throws IOException {
-        DocumentInfo documentInfo1 = tornadoService.listingGeneration("TOKEN", listingData, MANCHESTER_LISTING_CASE_TYPE_ID);
+        DocumentInfo documentInfo1 = tornadoService.listingGeneration(userToken, listingData, MANCHESTER_LISTING_CASE_TYPE_ID);
         assertEquals(documentInfo.toString(), documentInfo1.toString());
     }
 
     @Test
     public void scheduleGeneration() throws IOException {
-        DocumentInfo documentInfo1 = tornadoService.scheduleGeneration("TOKEN", bulkData);
+        DocumentInfo documentInfo1 = tornadoService.scheduleGeneration(userToken, bulkData);
         assertEquals(documentInfo.toString(), documentInfo1.toString());
     }
 

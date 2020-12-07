@@ -58,6 +58,7 @@ import static uk.gov.hmcts.ecm.common.model.helper.Constants.RESPONDENTS_ADDRESS
 import static uk.gov.hmcts.ecm.common.model.helper.Constants.RESPONDENTS_AND_RESPONDENTS_REPS_ADDRESSES;
 import static uk.gov.hmcts.ecm.common.model.helper.Constants.RESPONDENTS_REPS_ADDRESSES;
 import static uk.gov.hmcts.ecm.common.model.helper.Constants.RESPONDENT_REP;
+import static uk.gov.hmcts.ecm.common.model.helper.Constants.SCOTLAND_BULK_CASE_TYPE_ID;
 import static uk.gov.hmcts.ecm.common.model.helper.Constants.SCOTLAND_CASE_TYPE_ID;
 import static uk.gov.hmcts.ecm.common.model.helper.Constants.TEL;
 import static uk.gov.hmcts.ecm.common.model.helper.Constants.YES;
@@ -163,10 +164,20 @@ public class DocumentGenerationService {
         caseData.setAddressLabelsAttributesType(null);
     }
 
+    public void clearUserChoicesForMultiples(BulkDetails bulkDetails) {
+        BulkData bulkData = bulkDetails.getCaseData();
+
+        if(bulkDetails.getCaseTypeId().equals(SCOTLAND_BULK_CASE_TYPE_ID)) {
+            bulkData.setCorrespondenceScotType(null);
+        } else {
+            bulkData.setCorrespondenceType(null);
+        }
+    }
+
     public DocumentInfo processDocumentRequest(CCDRequest ccdRequest, String authToken) {
         CaseDetails caseDetails = ccdRequest.getCaseDetails();
         try {
-            return tornadoService.documentGeneration(authToken, caseDetails.getCaseData());
+            return tornadoService.documentGeneration(authToken, caseDetails.getCaseData(), caseDetails.getCaseTypeId());
         } catch (Exception ex) {
             throw new DocumentManagementException(MESSAGE + caseDetails.getCaseId() + ex.getMessage());
         }
@@ -197,7 +208,7 @@ public class DocumentGenerationService {
                     log.info("Generating document for: " + submitEvent.getCaseData().getEthosCaseReference());
                     submitEvent.getCaseData().setCorrespondenceType(bulkDetails.getCaseData().getCorrespondenceType());
                     submitEvent.getCaseData().setCorrespondenceScotType(bulkDetails.getCaseData().getCorrespondenceScotType());
-                    documentInfoList.add(tornadoService.documentGeneration(authToken, submitEvent.getCaseData()));
+                    documentInfoList.add(tornadoService.documentGeneration(authToken, submitEvent.getCaseData(), bulkDetails.getCaseTypeId()));
                 }
             }
             if (documentInfoList.isEmpty()) {
@@ -213,19 +224,6 @@ public class DocumentGenerationService {
         log.info("Markups: " + markUps);
         return bulkDocumentInfo;
     }
-
-//    private List<CaseData> filterCasesById(List<SubmitEvent> submitEvents, List<SearchTypeItem> searchTypeItems) {
-//        List<CaseData> caseDataResultList = new ArrayList<>();
-//        Map<String, CaseData> submitEventsList = submitEvents.stream().collect(Collectors.toMap(s -> String.valueOf(s.getCaseId()), SubmitEvent::getCaseData));
-//        for (SearchTypeItem searchTypeItem : searchTypeItems) {
-//            String caseId = searchTypeItem.getValue().getCaseIDS();
-//            if (submitEventsList.containsKey(caseId)) {
-//                log.info("Adding submitted key: " + caseId);
-//                caseDataResultList.add(submitEventsList.get(caseId));
-//            }
-//        }
-//        return caseDataResultList;
-//    }
 
     public BulkDocumentInfo processBulkScheduleRequest(BulkRequest bulkRequest, String authToken) {
         BulkDocumentInfo bulkDocumentInfo = new BulkDocumentInfo();
