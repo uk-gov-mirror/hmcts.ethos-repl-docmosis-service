@@ -25,11 +25,13 @@ import static uk.gov.hmcts.ecm.common.model.helper.Constants.*;
 public class ListingHelperTest {
 
     private ListingDetails listingDetails;
+    private ListingDetails listingDetails2;
     private UserDetails userDetails;
 
     @Before
     public void setUp() throws Exception {
         listingDetails = generateListingDetails("listingDetailsTest1.json");
+        listingDetails2 = generateListingDetails("listingDetailsTest2.json");
         userDetails = HelperTest.getUserDetails();
     }
 
@@ -450,6 +452,142 @@ public class ListingHelperTest {
     }
 
     @Test
+    public void buildCaseCauseList2() {
+        String expected = "{\n" +
+                "\"accessKey\":\"\",\n" +
+                "\"templateName\":\"EM-TRB-SCO-ENG-00212.docx\",\n" +
+                "\"outputName\":\"document.docx\",\n" +
+                "\"data\":{\n" +
+                "\"Court_addressLine1\":\"Manchester Employment Tribunal\",\n" +
+                "\"Court_addressLine2\":\"Alexandra House\",\n" +
+                "\"Court_addressLine3\":\"14-22 The Parsonage\",\n" +
+                "\"Court_town\":\"Manchester\",\n" +
+                "\"Court_county\":\"\",\n" +
+                "\"Court_postCode\":\"M3 2JA\",\n" +
+                "\"Court_fullAddress\":\"Manchester Employment Tribunal, Alexandra House, 14-22 The Parsonage, Manchester, M3 2JA\",\n" +
+                "\"Court_telephone\":\"03577131270\",\n" +
+                "\"Court_fax\":\"07577126570\",\n" +
+                "\"Court_DX\":\"123456\",\n" +
+                "\"Court_Email\":\"ManchesterOfficeET@hmcts.gov.uk\",\n" +
+                "\"listing_logo\":\"[userImage:enhmcts.png]\",\n" +
+                "\"Listed_date\":\"12 October 2020\",\n" +
+                "\"Hearing_location\":\"Manchester\",\n" +
+                "\"Clerk\":\"Mike Jordan\",\n" +
+                "\"listing\":[\n" +
+                "{\"Judge\":\"\",\n" +
+                "\"Court_addressLine1\":\"Manchester Employment Tribunal\",\n" +
+                "\"Court_addressLine2\":\"Alexandra House\",\n" +
+                "\"Court_addressLine3\":\"14-22 The Parsonage\",\n" +
+                "\"Court_town\":\"Manchester\",\n" +
+                "\"Court_county\":\"\",\n" +
+                "\"Court_postCode\":\"M3 2JA\",\n" +
+                "\"Court_fullAddress\":\"Manchester Employment Tribunal, Alexandra House, 14-22 The Parsonage, Manchester, M3 2JA\",\n" +
+                "\"Court_telephone\":\"03577131270\",\n" +
+                "\"Court_fax\":\"07577126570\",\n" +
+                "\"Court_DX\":\"123456\",\n" +
+                "\"Court_Email\":\"ManchesterOfficeET@hmcts.gov.uk\",\n" +
+                "\"listing_logo\":\"[userImage:enhmcts.png]\",\n" +
+                "\"ERMember\":\" \",\n" +
+                "\"EEMember\":\" \",\n" +
+                "\"Case_No\":\"1112\",\n" +
+                "\"Hearing_type\":\"Hearing\",\n" +
+                "\"Jurisdictions\":\"ADG, COM\",\n" +
+                "\"Hearing_date\":\"12 October 2020\",\n" +
+                "\"Hearing_date_time\":\"12 October 2020 at 00:00\",\n" +
+                "\"Hearing_time\":\"00:00\",\n" +
+                "\"Hearing_duration\":\"12 Days\",\n" +
+                "\"Hearing_clerk\":\"Anne Fox\",\n" +
+                "\"Claimant\":\"Mr s sdfs\",\n" +
+                "\"claimant_town\":\"claimantTown\",\n" +
+                "\"claimant_representative\":\"Rep\",\n" +
+                "\"Respondent\":\"sdf\",\n" +
+                "\"resp_others\":\"Mark Taylor\\nTony Jones\\nSteve Thomas\",\n" +
+                "\"respondent_town\":\"respondentTown\",\n" +
+                "\"Hearing_location\":\"Manchester\",\n" +
+                "\"Hearing_room\":\"Tribunal 2\",\n" +
+                "\"Hearing_dayofdays\":\"1 of 3\",\n" +
+                "\"Hearing_panel\":\"Panel\",\n" +
+                "\"Hearing_notes\":\"Notes1\",\n" +
+                "\"respondent_representative\":\"Org\"},\n" +
+                "{\"Judge\":\"\",\n" +
+                "\"Court_addressLine1\":\"Manchester Employment Tribunal\",\n" +
+                "\"Court_addressLine2\":\"Alexandra House\",\n" +
+                "\"Court_addressLine3\":\"14-22 The Parsonage\",\n" +
+                "\"Court_town\":\"Manchester\",\n" +
+                "\"Court_county\":\"\",\n" +
+                "\"Court_postCode\":\"M3 2JA\",\n" +
+                "\"Court_fullAddress\":\"Manchester Employment Tribunal, Alexandra House, 14-22 The Parsonage, Manchester, M3 2JA\",\n" +
+                "\"Court_telephone\":\"03577131270\",\n" +
+                "\"Court_fax\":\"07577126570\",\n" +
+                "\"Court_DX\":\"123456\",\n" +
+                "\"Court_Email\":\"ManchesterOfficeET@hmcts.gov.uk\",\n" +
+                "\"listing_logo\":\"[userImage:enhmcts.png]\",\n" +
+                "\"ERMember\":\" \",\n" +
+                "\"EEMember\":\" \",\n" +
+                "\"Case_No\":\"1112\",\n" +
+                "\"Hearing_type\":\"Hearing\",\n" +
+                "\"Jurisdictions\":\"ADG, DCD\",\n" +
+                "\"Hearing_date\":\"12 October 2020\",\n" +
+                "\"Hearing_date_time\":\"12 October 2020 at 00:00\",\n" +
+                "\"Hearing_time\":\"00:00\",\n" +
+                "\"Hearing_duration\":\"12 Days\",\n" +
+                "\"Hearing_clerk\":\"Andrew Pearl\",\n" +
+                "\"Claimant\":\"Mr s sdfs\",\n" +
+                "\"claimant_town\":\"claimantTown1\",\n" +
+                "\"claimant_representative\":\"Rep2\",\n" +
+                "\"Respondent\":\"sdf2\",\n" +
+                "\"resp_others\":\"Mark Taylor\\nTony Jones\",\n" +
+                "\"respondent_town\":\"respondentTown1\",\n" +
+                "\"Hearing_location\":\"Manchester\",\n" +
+                "\"Hearing_room\":\"Tribunal 2\",\n" +
+                "\"Hearing_dayofdays\":\"2 of 3\",\n" +
+                "\"Hearing_panel\":\"\",\n" +
+                "\"Hearing_notes\":\"Notes2\",\n" +
+                "\"respondent_representative\":\"Org2\"},\n" +
+                "{\"Judge\":\"\",\n" +
+                "\"Court_addressLine1\":\"Manchester Employment Tribunal\",\n" +
+                "\"Court_addressLine2\":\"Alexandra House\",\n" +
+                "\"Court_addressLine3\":\"14-22 The Parsonage\",\n" +
+                "\"Court_town\":\"Manchester\",\n" +
+                "\"Court_county\":\"\",\n" +
+                "\"Court_postCode\":\"M3 2JA\",\n" +
+                "\"Court_fullAddress\":\"Manchester Employment Tribunal, Alexandra House, 14-22 The Parsonage, Manchester, M3 2JA\",\n" +
+                "\"Court_telephone\":\"03577131270\",\n" +
+                "\"Court_fax\":\"07577126570\",\n" +
+                "\"Court_DX\":\"123456\",\n" +
+                "\"Court_Email\":\"ManchesterOfficeET@hmcts.gov.uk\",\n" +
+                "\"listing_logo\":\"[userImage:enhmcts.png]\",\n" +
+                "\"ERMember\":\" \",\n" +
+                "\"EEMember\":\" \",\n" +
+                "\"Case_No\":\"1112\",\n" +
+                "\"Hearing_type\":\"Preliminary Hearing (CM)\",\n" +
+                "\"Jurisdictions\":\"ADG, COM\",\n" +
+                "\"Hearing_date\":\"12 October 2020\",\n" +
+                "\"Hearing_date_time\":\"12 October 2020 at 00:00\",\n" +
+                "\"Hearing_time\":\"00:00\",\n" +
+                "\"Hearing_duration\":\"12 Minutes\",\n" +
+                "\"Hearing_clerk\":\"Anne Fox\",\n" +
+                "\"Claimant\":\"Mr s sdfs\",\n" +
+                "\"claimant_town\":\"claimantTown2\",\n" +
+                "\"claimant_representative\":\"Rep\",\n" +
+                "\"Respondent\":\"sdf\",\n" +
+                "\"resp_others\":\"Mark Taylor\",\n" +
+                "\"respondent_town\":\"respondentTown2\",\n" +
+                "\"Hearing_location\":\"Manchester\",\n" +
+                "\"Hearing_room\":\"Tribunal 4\",\n" +
+                "\"Hearing_dayofdays\":\"2 of 3\",\n" +
+                "\"Hearing_panel\":\"\",\n" +
+                "\"Hearing_notes\":\"Notes3\",\n" +
+                "\"respondent_representative\":\"Org\"}],\n" +
+                "\"case_total\":\"1\",\n" +
+                "\"Today_date\":\"" + UtilHelper.formatCurrentDate(LocalDate.now()) + "\"\n" +
+                "}\n" +
+                "}\n";
+        assertEquals(expected, ListingHelper.buildListingDocumentContent(listingDetails2.getCaseData(), "",
+                PUBLIC_CASE_CAUSE_LIST_TEMPLATE, userDetails, MANCHESTER_LISTING_CASE_TYPE_ID).toString());
+    }
+
+    @Test
     public void getCaseTypeId() {
         assertEquals(MANCHESTER_DEV_CASE_TYPE_ID, ListingHelper.getCaseTypeId(MANCHESTER_DEV_LISTING_CASE_TYPE_ID));
         assertEquals(MANCHESTER_USERS_CASE_TYPE_ID, ListingHelper.getCaseTypeId(MANCHESTER_USERS_LISTING_CASE_TYPE_ID));
@@ -505,16 +643,16 @@ public class ListingHelperTest {
         DateListedType dateListedType = new DateListedType();
         dateListedType.setHearingClerk("Clerk");
         dateListedType.setHearingRoomKirkawall("Tribunal 4");
-        dateListedType.setHearingEdinburgh("Edinburgh");
-        dateListedType.setHearingVenueDay("Other");
+        dateListedType.setHearingEdinburgh("EdinburghVenue");
+        dateListedType.setHearingVenueDay("Edinburgh");
         dateListedType.setListedDate("2019-12-12T12:11:00.000");
         dateListedTypeItem.setId("123");
         dateListedTypeItem.setValue(dateListedType);
         hearingType.setHearingDateCollection(new ArrayList<>(Collections.singleton(dateListedTypeItem)));
-        hearingType.setHearingVenue("Aberdeen");
+        hearingType.setHearingVenue(ABERDEEN_OFFICE);
         hearingType.setHearingEstLengthNum("2");
         hearingType.setHearingEstLengthNumType("hours");
-        String expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=Edinburgh, elmoCaseReference=null, " +
+        String expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=EdinburghVenue, elmoCaseReference=null, " +
                 "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
                 "hearingDay=2 of 3, claimantName=Rodriguez, claimantTown= , claimantRepresentative= , respondent=Juan Pedro, respondentTown= , " +
                 "respondentRepresentative= , estHearingLength=2 hours, hearingPanel= , hearingRoom=Tribunal 4, respondentOthers= , hearingNotes= )";
@@ -522,8 +660,9 @@ public class ListingHelperTest {
 
         dateListedType.setHearingRoomStranraer("Tribunal 5");
         dateListedType.setHearingEdinburgh(null);
-        dateListedType.setHearingDundee("Dundee");
-        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=Dundee, elmoCaseReference=null, " +
+        dateListedType.setHearingVenueDay(DUNDEE_OFFICE);
+        dateListedType.setHearingDundee("DundeeVenue");
+        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=DundeeVenue, elmoCaseReference=null, " +
                 "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
                 "hearingDay=2 of 3, claimantName=Rodriguez, claimantTown= , claimantRepresentative= , respondent=Juan Pedro, respondentTown= , " +
                 "respondentRepresentative= , estHearingLength=2 hours, hearingPanel= , hearingRoom=Tribunal 5, respondentOthers= , hearingNotes= )";
@@ -531,8 +670,9 @@ public class ListingHelperTest {
 
         dateListedType.setHearingRoomCambeltown("Tribunal 6");
         dateListedType.setHearingDundee(null);
-        dateListedType.setHearingGlasgow("Glasgow");
-        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=Glasgow, elmoCaseReference=null, " +
+        dateListedType.setHearingVenueDay(GLASGOW_OFFICE);
+        dateListedType.setHearingGlasgow("GlasgowVenue");
+        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=GlasgowVenue, elmoCaseReference=null, " +
                 "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
                 "hearingDay=2 of 3, claimantName=Rodriguez, claimantTown= , claimantRepresentative= , respondent=Juan Pedro, respondentTown= , " +
                 "respondentRepresentative= , estHearingLength=2 hours, hearingPanel= , hearingRoom=Tribunal 6, respondentOthers= , hearingNotes= )";
@@ -540,7 +680,9 @@ public class ListingHelperTest {
 
         dateListedType.setHearingRoomCambeltown("Tribunal 7");
         dateListedType.setHearingGlasgow(null);
-        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=Other, elmoCaseReference=null, " +
+        dateListedType.setHearingVenueDay(EDINBURGH_OFFICE);
+        dateListedType.setHearingEdinburgh("EdinburghVenue");
+        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=EdinburghVenue, elmoCaseReference=null, " +
                 "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
                 "hearingDay=2 of 3, claimantName=Rodriguez, claimantTown= , claimantRepresentative= , respondent=Juan Pedro, respondentTown= , " +
                 "respondentRepresentative= , estHearingLength=2 hours, hearingPanel= , hearingRoom=Tribunal 7, respondentOthers= , hearingNotes= )";
@@ -552,27 +694,27 @@ public class ListingHelperTest {
         caseDataRule50.setRestrictedReporting(restrictedReportingType);
         ListingData listingDataPublic = listingDetails.getCaseData();
         listingDataPublic.setHearingDocETCL(HEARING_ETCL_PUBLIC);
-        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=Other, elmoCaseReference=null, " +
+        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=EdinburghVenue, elmoCaseReference=null, " +
                 "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
                 "hearingDay=2 of 3, claimantName= , claimantTown= , claimantRepresentative= , respondent= , respondentTown= , " +
                 "respondentRepresentative= , estHearingLength=2 hours, hearingPanel= , hearingRoom=Tribunal 7, respondentOthers= , hearingNotes= )";
         assertEquals(expected, ListingHelper.getListingTypeFromCaseData(listingDataPublic, caseDataRule50, hearingType, dateListedType, 1, 3).toString());
         ListingData listingDataPressList = listingDetails.getCaseData();
         listingDataPressList.setHearingDocETCL(HEARING_ETCL_PRESS_LIST);
-        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=Other, elmoCaseReference=null, " +
+        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=EdinburghVenue, elmoCaseReference=null, " +
                 "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
                 "hearingDay=2 of 3, claimantName=Order made pursuant to Rule 50, claimantTown= , claimantRepresentative= , " +
                 "respondent=Order made pursuant to Rule 50, respondentTown= , respondentRepresentative= , estHearingLength=2 hours, " +
                 "hearingPanel= , hearingRoom=Tribunal 7, respondentOthers= , hearingNotes= )";
         assertEquals(expected, ListingHelper.getListingTypeFromCaseData(listingDataPressList, caseDataRule50, hearingType, dateListedType, 1, 3).toString());
 
-        dateListedType.setHearingVenueDay("Manchester");
+        dateListedType.setHearingVenueDay("ManchesterVenue");
         dateListedType.setHearingRoomKirkawall(null);
         dateListedType.setHearingRoomStranraer(null);
         dateListedType.setHearingRoomCambeltown(null);
 
         dateListedType.setHearingRoomM("Tribunal M");
-        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=Manchester, elmoCaseReference=null, " +
+        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=ManchesterVenue, elmoCaseReference=null, " +
                 "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
                 "hearingDay=2 of 3, claimantName=Rodriguez, claimantTown= , claimantRepresentative= , respondent=Juan Pedro, respondentTown= , " +
                 "respondentRepresentative= , estHearingLength=2 hours, hearingPanel= , hearingRoom=Tribunal M, respondentOthers= , hearingNotes= )";
@@ -580,7 +722,7 @@ public class ListingHelperTest {
         dateListedType.setHearingRoomM(null);
 
         dateListedType.setHearingRoomL("Tribunal L");
-        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=Manchester, elmoCaseReference=null, " +
+        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=ManchesterVenue, elmoCaseReference=null, " +
                 "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
                 "hearingDay=2 of 3, claimantName=Rodriguez, claimantTown= , claimantRepresentative= , respondent=Juan Pedro, respondentTown= , " +
                 "respondentRepresentative= , estHearingLength=2 hours, hearingPanel= , hearingRoom=Tribunal L, respondentOthers= , hearingNotes= )";
@@ -588,7 +730,7 @@ public class ListingHelperTest {
         dateListedType.setHearingRoomL(null);
 
         dateListedType.setHearingRoomCM("Tribunal CM");
-        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=Manchester, elmoCaseReference=null, " +
+        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=ManchesterVenue, elmoCaseReference=null, " +
                 "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
                 "hearingDay=2 of 3, claimantName=Rodriguez, claimantTown= , claimantRepresentative= , respondent=Juan Pedro, respondentTown= , " +
                 "respondentRepresentative= , estHearingLength=2 hours, hearingPanel= , hearingRoom=Tribunal CM, respondentOthers= , hearingNotes= )";
@@ -596,7 +738,7 @@ public class ListingHelperTest {
         dateListedType.setHearingRoomCM(null);
 
         dateListedType.setHearingRoomCC("Tribunal CC");
-        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=Manchester, elmoCaseReference=null, " +
+        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=ManchesterVenue, elmoCaseReference=null, " +
                 "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
                 "hearingDay=2 of 3, claimantName=Rodriguez, claimantTown= , claimantRepresentative= , respondent=Juan Pedro, respondentTown= , " +
                 "respondentRepresentative= , estHearingLength=2 hours, hearingPanel= , hearingRoom=Tribunal CC, respondentOthers= , hearingNotes= )";
@@ -604,7 +746,7 @@ public class ListingHelperTest {
         dateListedType.setHearingRoomCC(null);
 
         dateListedType.setHearingRoomCrownCourt("Tribunal Crown Court");
-        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=Manchester, elmoCaseReference=null, " +
+        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=ManchesterVenue, elmoCaseReference=null, " +
                 "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
                 "hearingDay=2 of 3, claimantName=Rodriguez, claimantTown= , claimantRepresentative= , respondent=Juan Pedro, respondentTown= , " +
                 "respondentRepresentative= , estHearingLength=2 hours, hearingPanel= , hearingRoom=Tribunal Crown Court, respondentOthers= , hearingNotes= )";
@@ -612,7 +754,7 @@ public class ListingHelperTest {
         dateListedType.setHearingRoomCrownCourt(null);
 
         dateListedType.setHearingRoomKendal("Tribunal Kendal");
-        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=Manchester, elmoCaseReference=null, " +
+        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=ManchesterVenue, elmoCaseReference=null, " +
                 "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
                 "hearingDay=2 of 3, claimantName=Rodriguez, claimantTown= , claimantRepresentative= , respondent=Juan Pedro, respondentTown= , " +
                 "respondentRepresentative= , estHearingLength=2 hours, hearingPanel= , hearingRoom=Tribunal Kendal, respondentOthers= , hearingNotes= )";
@@ -620,7 +762,7 @@ public class ListingHelperTest {
         dateListedType.setHearingRoomKendal(null);
 
         dateListedType.setHearingRoomMinshullSt("Tribunal Minshull St");
-        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=Manchester, elmoCaseReference=null, " +
+        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=ManchesterVenue, elmoCaseReference=null, " +
                 "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
                 "hearingDay=2 of 3, claimantName=Rodriguez, claimantTown= , claimantRepresentative= , respondent=Juan Pedro, respondentTown= , " +
                 "respondentRepresentative= , estHearingLength=2 hours, hearingPanel= , hearingRoom=Tribunal Minshull St, respondentOthers= , hearingNotes= )";
@@ -628,10 +770,18 @@ public class ListingHelperTest {
         dateListedType.setHearingRoomMinshullSt(null);
 
         dateListedType.setHearingRoomMancMagistrate("Tribunal Manc Magistrate");
-        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=Manchester, elmoCaseReference=null, " +
+        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue=ManchesterVenue, elmoCaseReference=null, " +
                 "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
                 "hearingDay=2 of 3, claimantName=Rodriguez, claimantTown= , claimantRepresentative= , respondent=Juan Pedro, respondentTown= , " +
                 "respondentRepresentative= , estHearingLength=2 hours, hearingPanel= , hearingRoom=Tribunal Manc Magistrate, respondentOthers= , hearingNotes= )";
+        assertEquals(expected, ListingHelper.getListingTypeFromCaseData(listingDetails.getCaseData(), caseData, hearingType, dateListedType, 1, 3).toString());
+        dateListedType.setHearingRoomMancMagistrate(null);
+
+        dateListedType.setHearingVenueDay(null);
+        expected = "ListingType(causeListDate=12 December 2019, causeListTime=12:11, causeListVenue= , elmoCaseReference=null, " +
+                "jurisdictionCodesList= , hearingType= , positionType= , hearingJudgeName= , hearingEEMember= , hearingERMember= , hearingClerk=Clerk, " +
+                "hearingDay=2 of 3, claimantName=Rodriguez, claimantTown= , claimantRepresentative= , respondent=Juan Pedro, respondentTown= , " +
+                "respondentRepresentative= , estHearingLength=2 hours, hearingPanel= , hearingRoom= , respondentOthers= , hearingNotes= )";
         assertEquals(expected, ListingHelper.getListingTypeFromCaseData(listingDetails.getCaseData(), caseData, hearingType, dateListedType, 1, 3).toString());
         dateListedType.setHearingRoomMancMagistrate(null);
     }
