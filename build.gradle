@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        springBootVersion = '2.3.1.RELEASE'
+        springBootVersion = '2.3.9.RELEASE'
     }
     repositories {
         mavenCentral()
@@ -19,6 +19,10 @@ plugins {
     id 'org.owasp.dependencycheck' version '6.0.1'
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'java'
+    id 'uk.gov.hmcts.java' version '0.12.5'
+    id 'au.com.dius.pact' version '4.1.0'
+    id 'io.freefair.lombok' version '5.3.0'
+    id 'org.springframework.boot' version '2.3.9.RELEASE'
 }
 
 apply plugin: 'java'
@@ -84,11 +88,22 @@ sourceSets {
         compileClasspath += main.output + test.output
         runtimeClasspath += main.output + test.output
     }
+
+    contractTest {
+        java {
+            compileClasspath += main.output
+            runtimeClasspath += main.output
+            srcDir file('src/test/contractTest/java')
+        }
+        resources.srcDir file('src/test/contractTest/resources')
+    }
 }
 
 configurations {
     functionalCompile.extendsFrom testCompile
     functionalRuntime.extendsFrom testRuntime
+    contractTestCompile.extendsFrom testCompile
+    contractTestRuntime.extendsFrom testRuntime
 }
 
 test {
@@ -140,8 +155,49 @@ repositories {
     maven { url 'https://repo.spring.io/libs-milestone' }
 }
 
+project.ext {
+    pacticipant = 'ia_caseNotificationsApi'
+    pacticipantVersion = getCheckedOutGitCommitHash()
+}
+
+def getCheckedOutGitCommitHash() {
+    'git rev-parse --verify --short HEAD'.execute().text.trim()
+}
+
+task runContractTests(type: Test, description: 'Runs contract tests.', group: 'Verification') {
+    onlyIf {
+        return System.env.SKIP_CONTRACT_TESTS == null || System.env.SKIP_CONTRACT_TESTS == 'false'
+    }
+    useJUnitPlatform()
+    testClassesDirs = sourceSets.contractTest.output.classesDirs
+    classpath = sourceSets.contractTest.runtimeClasspath
+    systemProperty 'pact.rootDir', "pacts"
+    testLogging.showStandardStreams = true
+
+}
+
+task runAndPublishConsumerPactTests(type: Test, description: 'Publish pact test to broker.', group: 'Verification') {
+    logger.lifecycle("Runs pact consumer Tests")
+    testClassesDirs = sourceSets.contractTest.output.classesDirs
+    classpath = sourceSets.contractTest.runtimeClasspath
+}
+
+runAndPublishConsumerPactTests.finalizedBy pactPublish
+
+pact {
+    broker {
+        pactBrokerUrl = System.getenv("PACT_BROKER_FULL_URL") ?: 'http://localhost:80'
+    }
+    publish {
+        pactDirectory = 'pacts'
+        tags = [System.getenv("PACT_BRANCH_NAME") ?: 'Dev']
+        version = project.pacticipantVersion
+    }
+}
+
 def versions = [
         springfoxSwagger: '2.9.2',
+        pact_version       : '4.1.7',
         logging: '5.1.0'
 ]
 
@@ -185,7 +241,7 @@ dependencies {
     testCompile group: 'com.auth0', name: 'java-jwt', version: '3.10.3'
     testCompile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
     testCompile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.3.1.RELEASE'
+    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.3.9.RELEASE'
     testCompile group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
 
     testCompile group: 'net.serenity-bdd', name: 'serenity-core', version: '2.3.6'
@@ -194,6 +250,22 @@ dependencies {
     }
     testCompile group: 'net.serenity-bdd', name: 'serenity-junit', version: '2.3.6'
     testCompile group: 'net.serenity-bdd', name: 'serenity-spring', version: '2.3.6'
+
+    contractTestCompile group: 'uk.gov.hmcts.reform', name: 'ecm-common', version: '0.1.44'
+    contractTestImplementation group: 'uk.gov.hmcts.reform', name: 'ecm-common', version: '0.1.44'
+    contractTestCompile group: 'au.com.dius.pact.consumer', name: 'junit5', version: versions.pact_version
+    contractTestCompile group: 'au.com.dius.pact.consumer', name: 'java8', version: versions.pact_version
+    contractTestCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.3.9.RELEASE'
+    contractTestImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.3.9.RELEASE'
+    contractTestCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit_jupiter
+    contractTestRuntime group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: versions.junit_jupiter
+    contractTestImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: versions.junit_jupiter
+    contractTestRuntime group: 'org.junit.platform', name: 'junit-platform-commons', version: '1.7.0'
+    contractTestImplementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.4'
+    contractTestCompile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.11.4'
+    contractTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '2.2.7.RELEASE'
+    contractTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-netflix-ribbon', version: '2.2.7.RELEASE'
+
 }
 
 bootJar {
