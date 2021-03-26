@@ -192,13 +192,6 @@ public class ListingService {
         listingData.setVenueAberdeen(null);
         listingData.setVenueDundee(null);
         listingData.setVenueEdinburgh(null);
-        boolean dateRange = listingData.getHearingDateType().equals(RANGE_HEARING_DATE_TYPE);
-        if (dateRange) {
-            listingData.setListingDateFrom(null);
-            listingData.setListingDateTo(null);
-        } else {
-            listingData.setListingDate(null);
-        }
         listingData.setClerkResponsible(null);
         return listingData;
     }
@@ -208,20 +201,22 @@ public class ListingService {
         if (isHearingTypeValid(listingData, hearingTypeItem)) {
             int hearingDateCollectionSize = hearingTypeItem.getValue().getHearingDateCollection().size();
             for (int i = 0; i < hearingDateCollectionSize; i++) {
+                log.info("EthosCaseRef Listing: " + caseData.getEthosCaseReference());
                 DateListedTypeItem dateListedTypeItem = hearingTypeItem.getValue().getHearingDateCollection().get(i);
                 boolean isListingVenueValid = isListingVenueValid(listingData, dateListedTypeItem);
                 log.info("isListingVenueValid: " + isListingVenueValid);
+                if (!isListingVenueValid) continue;
                 boolean isListingDateValid = isListingDateValid(listingData, dateListedTypeItem);
                 log.info("isListingDateValid: " + isListingDateValid);
+                if (!isListingDateValid) continue;
                 boolean isListingStatusValid = isListingStatusValid(dateListedTypeItem);
                 log.info("isListingStatusValid: " + isListingStatusValid);
-                if (isListingDateValid && isListingVenueValid && isListingStatusValid) {
-                    ListingTypeItem listingTypeItem = new ListingTypeItem();
-                    ListingType listingType = ListingHelper.getListingTypeFromCaseData(listingData, caseData, hearingTypeItem.getValue(), dateListedTypeItem.getValue(), i, hearingDateCollectionSize);
-                    listingTypeItem.setId(String.valueOf(dateListedTypeItem.getId()));
-                    listingTypeItem.setValue(listingType);
-                    listingTypeItems.add(listingTypeItem);
-                }
+                if (!isListingStatusValid) continue;
+                ListingTypeItem listingTypeItem = new ListingTypeItem();
+                ListingType listingType = ListingHelper.getListingTypeFromCaseData(listingData, caseData, hearingTypeItem.getValue(), dateListedTypeItem.getValue(), i, hearingDateCollectionSize);
+                listingTypeItem.setId(String.valueOf(dateListedTypeItem.getId()));
+                listingTypeItem.setValue(listingType);
+                listingTypeItems.add(listingTypeItem);
             }
         }
         return listingTypeItems;
@@ -323,7 +318,9 @@ public class ListingService {
             HearingType hearingType = hearingTypeItem.getValue();
 
             if (hearingType.getHearingType() != null) {
-                if (hearingType.getHearingType().equals(HEARING_TYPE_PERLIMINARY_HEARING) && hearingType.getHearingPublicPrivate().equals(HEARING_TYPE_PRIVATE)) {
+                if (hearingType.getHearingType().equals(HEARING_TYPE_PERLIMINARY_HEARING)
+                        && hearingType.getHearingPublicPrivate() != null
+                        && hearingType.getHearingPublicPrivate().equals(HEARING_TYPE_PRIVATE)) {
                     return false;
                 } else {
                     List<String> invalidHearingTypes = Arrays.asList(HEARING_TYPE_JUDICIAL_MEDIATION, HEARING_TYPE_JUDICIAL_MEDIATION_TCC, HEARING_TYPE_PERLIMINARY_HEARING_CM, HEARING_TYPE_PERLIMINARY_HEARING_CM_TCC);
